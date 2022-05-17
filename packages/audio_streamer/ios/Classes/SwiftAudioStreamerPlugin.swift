@@ -76,7 +76,7 @@ public class SwiftAudioStreamerPlugin: NSObject, FlutterPlugin, FlutterStreamHan
             let samples = buffer.floatChannelData?[0]
             // audio callback, samples in samples[0]...samples[buffer.frameLength-1]
             let arr = Array(UnsafeBufferPointer(start: samples, count: Int(buffer.frameLength)))
-            self.emitValues(values: arr)
+            self.emitValues(values: [arr.min, arr.max])
         }
 
         try! engine.start()

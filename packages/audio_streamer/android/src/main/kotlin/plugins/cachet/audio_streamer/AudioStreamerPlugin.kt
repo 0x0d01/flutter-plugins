@@ -119,10 +119,15 @@ class AudioStreamerPlugin : FlutterPlugin, RequestPermissionsResultListener, Eve
                 Handler(Looper.getMainLooper()).post {
                     /// Convert to list in order to send via EventChannel.
                     val audioBufferList = ArrayList<Double>()
+                    var min = Double.POSITIVE_INFINITY;
+                    var max = Double.NEGATIVE_INFINITY;
                     for (impulse in audioBuffer) {
                         val normalizedImpulse = impulse.toDouble() / maxAmplitude.toDouble()
-                        audioBufferList.add(normalizedImpulse)
+                        if (min > normalizedImpulse) min = normalizedImpulse
+                        if (max < normalizedImpulse) max = normalizedImpulse
                     }
+                    audioBufferList.add(min)
+                    audioBufferList.add(max)
                     eventSink!!.success(audioBufferList)
                 }
             }
