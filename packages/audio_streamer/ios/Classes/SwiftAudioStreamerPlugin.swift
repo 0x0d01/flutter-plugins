@@ -72,11 +72,11 @@ public class SwiftAudioStreamerPlugin: NSObject, FlutterPlugin, FlutterStreamHan
         let input = engine.inputNode
         let bus = 0
 
-        input.installTap(onBus: bus, bufferSize: 22050, format: input.inputFormat(forBus: bus)) { (buffer, time) -> Void in
+        input.installTap(onBus: bus, bufferSize: 2, format: input.inputFormat(forBus: bus)) { (buffer, time) -> Void in
             let samples = buffer.floatChannelData?[0]
             // audio callback, samples in samples[0]...samples[buffer.frameLength-1]
             let arr = Array(UnsafeBufferPointer(start: samples, count: Int(buffer.frameLength)))
-            self.emitValues(values: [arr.min, arr.max])
+            self.emitValues(values: buffer.frameLength == 0 ? [] : [arr.min()!, arr.max()!])
         }
 
         try! engine.start()
