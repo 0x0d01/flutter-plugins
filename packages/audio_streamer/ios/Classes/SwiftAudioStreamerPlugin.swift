@@ -26,21 +26,6 @@ public class SwiftAudioStreamerPlugin: NSObject, FlutterPlugin, FlutterStreamHan
                   selector: #selector(handleInterruption(notification:)),
                   name: AVAudioSession.interruptionNotification,
                   object: nil)
-      
-    NotificationCenter.default.addObserver( forName:AVAudioSession.routeChangeNotification, object: AVAudioSession.sharedInstance(), queue: nil) { notification in
-      guard let userInfo = notification.userInfo,
-            let reasonValue = userInfo[AVAudioSessionRouteChangeReasonKey] as? UInt,
-            let reason = AVAudioSession.RouteChangeReason(rawValue:reasonValue) else {
-          return
-      }
-      switch reason {
-      case .newDeviceAvailable, .oldDeviceUnavailable:
-          self.engine.stop()
-          self.startRecording()
-          break
-      default: ()
-      }
-    }
   }
 
   @objc func handleInterruption(notification: Notification) {
