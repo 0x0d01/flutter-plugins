@@ -24,7 +24,7 @@ class AudioStreamerPlugin : FlutterPlugin, RequestPermissionsResultListener, Eve
     /// Constants
     private val eventChannelName = "audio_streamer.eventChannel"
     private val sampleRate = 44100
-    private var bufferSize = 2; /// Magical number!
+    private var bufferSize = 1024; /// Magical number!
     private val maxAmplitude = 32767 // same as 2^15
     private val logTag = "AudioStreamerPlugin"
 
@@ -111,21 +111,24 @@ class AudioStreamerPlugin : FlutterPlugin, RequestPermissionsResultListener, Eve
                 Log.e(logTag, "Audio Record can't initialize!")
                 return@Runnable
             }
+            
             /** Start recording loop  */
             record.startRecording()
             while (recording) {
                 /** Read data into buffer  */
                 record.read(audioBuffer, 0, audioBuffer.size)
+
                 Handler(Looper.getMainLooper()).post {
-                    /// Convert to list in order to send via EventChannel.
-                    val audioBufferList = ArrayList<Double>()
-                    var min = Double.POSITIVE_INFINITY;
-                    var max = Double.NEGATIVE_INFINITY;
+                    var min = Double.POSITIVE_INFINITY
+                    var max = Double.NEGATIVE_INFINITY
                     for (impulse in audioBuffer) {
-                        val normalizedImpulse = impulse.toDouble() / maxAmplitude.toDouble()
+                        val normalizedImpulse = Math.abs(impulse.toDouble() / maxAmplitude.toDouble())
                         if (min > normalizedImpulse) min = normalizedImpulse
                         if (max < normalizedImpulse) max = normalizedImpulse
                     }
+
+                    val audioBufferList = ArrayList<Double>()
+                    audioBufferList.clear()
                     audioBufferList.add(min)
                     audioBufferList.add(max)
                     eventSink!!.success(audioBufferList)
